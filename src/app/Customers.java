@@ -1,6 +1,6 @@
 package app;
 
-public class Customer {
+public class Customers {
 	private String userNum;
 	private String password;
 	private Type   type;
@@ -9,6 +9,4 @@ public class Customer {
 		Staff,
 		Student
 	}
-	
-	
 }
