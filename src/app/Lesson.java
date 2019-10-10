@@ -4,18 +4,15 @@ import java.lang.reflect.Field;
 
 public abstract class Lesson {
 	private long id;
-	private long staffId;
-	private long venueId;
-	private long coId;
+	private long staffId;//	private Staff staff;
+	private long venueId;//	private Venue venue;
+	private long coId;//	private CourseOffering co;
 	private double startHour;
 	private double endHour;
 	private int day;
-//	private Staff staff;
-//	private Venue venue;
-//	private CourseOffering co;
-	protected Type type;
+	protected String type;
 	
-	enum Type{
+	protected enum Type{
 		Lecture, 
 		Tutorial
 	}
@@ -34,7 +31,7 @@ public abstract class Lesson {
 	
 	protected boolean setStaff(Staff staff) {
 		try {
-			this.staff = staff;
+			this.staffId = (Long) staff.getColumn("id");
 		} catch (Exception e) {
 			System.err.println(e);
 		}

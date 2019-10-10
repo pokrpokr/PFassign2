@@ -184,6 +184,10 @@ public class DB {
     	return false;
     }
     
+    public Connection getConn() {
+		return this.conn;
+	}
+    
     public static void main(String[] args) {
     	DB db = new DB();
     	Customers cus1 = new Customers("test6", "123456789", "");

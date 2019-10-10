@@ -11,6 +11,7 @@ public class CourseOffering {
 	
 	public CourseOffering(int maxNum, Course course) {
 		this.maxNum = maxNum;
+		this.courseId = (Long) course.getColumn("id");
 	}
 	
 	public boolean addLecture(int day, double start, double dur, Venue ven) {
