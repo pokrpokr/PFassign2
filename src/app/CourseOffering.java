@@ -1,8 +1,13 @@
 package app;
 
+import java.lang.reflect.Field;
+
 public class CourseOffering {
+	private long id;
+	private long courseId;
+	private long lessonId;
 	private int maxNum;
-	private Course course;
+//	private Course course;
 	
 	public CourseOffering(int maxNum, Course course) {
 		this.maxNum = maxNum;
@@ -22,5 +27,14 @@ public class CourseOffering {
 	
 	public String checkClash(int day, int start) {
 		
+	}
+	
+	public Object getColumn(String columnName) {
+		try {
+			Field field = this.getClass().getDeclaredField(columnName);
+			return field.get(this);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }
