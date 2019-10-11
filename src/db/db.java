@@ -1,5 +1,6 @@
 package db;
 import app.*;
+import cu_exceptions.InsertFailedException;
 
 import java.sql.*;
 import java.util.*;
@@ -59,7 +60,7 @@ public class DB {
             ResultSet rs = this.stmt.executeQuery(sql);
             ResultSetMetaData meta = rs.getMetaData();
     		ArrayList<Object> data = new ArrayList<>();
-    		// result = {"status": [true, false, error], "data": [Object], "message": ""}    		
+    		// result = {"status": [true, false], "data": [Object], "message": ""}    		
 			HashMap<String, Object> result = new HashMap<>();
     		
             switch (className) {
@@ -107,7 +108,7 @@ public class DB {
             return result;
 		} catch (Exception e) {
 			HashMap<String, Object> result = new HashMap<>();
-			result.put("status", "error");
+			result.put("status", false);
 			result.put("data", new ArrayList<>());
 			result.put("message", e);
 			return result;
@@ -123,7 +124,7 @@ public class DB {
 	}
     
     public HashMap<String, Object> insert(Connection conn, String sql, Object object) {
-    	// result = {"status": [true, false, error], "id": 1, "message": ""}    		    	
+    	// result = {"status": [true, false], "id": 1, "message": ""}    		    	
     	HashMap<String, Object> result = new HashMap<>();
     	result.put("status", false);
     	result.put("id", null);
@@ -156,11 +157,11 @@ public class DB {
 		}
     	catch (SQLException se) {
     		//se.printStackTrace();
-			result.put("status", "error");
+			result.put("status", false);
 			result.put("message", "SQL excetion occuring: " + se);
 		}
     	catch (Exception e) {
-    		result.put("status", "error");
+    		result.put("status", false);
 			result.put("message", "Excetion occuring: " + e);
 		}
     	finally {
@@ -188,18 +189,19 @@ public class DB {
 		return this.conn;
 	}
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InsertFailedException {
     	DB db = new DB();
-    	Customers cus1 = new Customers("test6", "123456789", "");
-    	HashMap<String, Object> insertRs = db.insert(db.conn, "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)", cus1);
-    	System.out.println(insertRs.get("status"));
-    	System.out.println(insertRs.get("id"));
-    	System.out.println(insertRs.get("message"));
-    	HashMap<String, Object> result = db.search(db.conn, "Customers", "select userNum, id, password,type from customers");
+    	Customers.createCustomer("test9", "123456789", "");
+//    	HashMap<String, Object> insertRs = db.insert(db.conn, "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)", cus1);
+//    	System.out.println(insertRs.get("status"));
+//    	System.out.println(insertRs.get("id"));
+//    	System.out.println(insertRs.get("message"));
+    	HashMap<String, Object> result = db.search(db.conn, "Customers", "select userNum, id, password,type from customers where deleted_at is null");
     	db.db_close();
+    	System.out.println(result.get("message"));
     	ArrayList<Object> cuses = (ArrayList<Object>) result.get("data");
     	for (int i = 0; i < cuses.size(); i++) {
-			System.out.println(((Customers) cuses.get(0)).getColumn("userNum"));
+			System.out.println(((Customers) cuses.get(i)).getColumn("userNum"));
 		}
     }
 }

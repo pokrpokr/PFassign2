@@ -45,17 +45,19 @@ public class Customers {
 	}
 	
 	public static Customers createCustomer(String userNum, String password, String type) throws InsertFailedException {
-		Customers customer = new Customers(userNum, password, type);
-		if (customer.saveCustomers()) {
+		try {
+			Customers customer = new Customers(userNum, password, type);
+			String sql = "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)";
+			customer.saveInstance(sql);
 			return customer;
-		}else {
-			throw new InsertFailedException("Creating customer failed");
-		} 
+		} catch (InsertFailedException ie) {
+			throw ie;
+		}
 	}
 	
 	public Object login(String userNum, String password) {
 		DB db = new DB();
-		String sql = "select userNum, id, password,type from customers where userNum =" + userNum;
+		String sql = "select userNum, id, password,type from customers where userNum =" + userNum + " and deleted_at is null";
     	HashMap<String, Object> result = db.search(db.getConn(), "Customers", sql);
     	db.db_close();
     	if ((Boolean) result.get("status") == true) {
@@ -89,17 +91,16 @@ public class Customers {
 		return true;
 	}
 	
-	// Saving instance 	
-	private Boolean saveCustomers() {
+	// Saving instance into database TODO refactor to a common method
+	private void saveInstance(String sql) throws InsertFailedException {
 		DB db = new DB();
     	HashMap<String, Object> insertRs = 
-    			db.insert(db.getConn(), "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)", this);
+    			db.insert(db.getConn(), sql, this);
     	db.db_close();
     	if ((Boolean) insertRs.get("status") == true) {
 			this.setId((Long) insertRs.get("id"));
-			return true;
 		}else {
-			return false;
+			throw new InsertFailedException((String) insertRs.get("message"));
 		}
 	}
 }
