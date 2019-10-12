@@ -30,24 +30,18 @@ public abstract class Lesson {
 		// TODO Auto-generated constructor stub
 	}
 	
-	protected Lesson(int day, double startHr, double dur, Venue venue, CourseOffering co) {
+	protected Lesson(int day, double startHr, double dur, CourseOffering co) {
 		this.day = day;
 		this.startHour = startHr;
 		this.endHour = startHr + dur;
-		this.venueId = (long) venue.getColumn("id");
-		this.coId = (long) co.getColumn("id");
+		this.coId = (Long) co.getColumn("id");
 		java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		this.created_at = nowTime;
 		this.updated_at = nowTime;
 	}
 	
-	protected boolean setStaff(Staff staff) {
-		try {
-			this.staffId = (Long) staff.getColumn("id");
-		} catch (Exception e) {
-			System.err.println(e);
-		}
-		return true;
+	protected boolean setStaff(Staff staff) throws InsertFailedException {
+		return this.setColumn("staffId", staff.getColumn("id"));
 	}
 	
 	public Object getColumn(String columnName) {
@@ -59,7 +53,18 @@ public abstract class Lesson {
 		}
 	}
 	
-	public boolean setId(Long id) {
+	public Boolean setColumn(String columnName, Object value) throws InsertFailedException {
+		DB db = new DB();
+		String sql = "update lessons set " + columnName + " = ?";
+		HashMap<String, Object> result = db.update(db.getConn(), sql, columnName, value, this.id);
+		if ((boolean) result.get("status")) {
+			return true;
+		}else {
+			throw new InsertFailedException((String) result.get("message"));
+		}
+	}
+	
+	private boolean setId(Long id) {
 		try {
 			this.id = id;
 		} catch (Exception e) {
@@ -74,7 +79,7 @@ public abstract class Lesson {
     	HashMap<String, Object> insertRs = 
     			db.insert(db.getConn(), sql, this);
     	db.db_close();
-    	if ((Boolean) insertRs.get("status") == true) {
+    	if ((Boolean) insertRs.get("status")) {
 			this.setId((Long) insertRs.get("id"));
 		}else {
 			throw new InsertFailedException((String) insertRs.get("message"));

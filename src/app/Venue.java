@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import cu_exceptions.InsertFailedException;
 import db.DB;
 
 public class Venue {
@@ -16,14 +17,22 @@ public class Venue {
 	private Timestamp updated_at;
 	private Timestamp delete_at = null;
 	
+	public Venue() {}
+	
 	public Venue(String location, int capacity, String purpose) {
 		this.location = location;
 		this.capacity = capacity;
 		this.purpose = purpose;
-		
 		java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		this.created_at = nowTime;
 		this.updated_at = nowTime;
+	}
+	
+	public static Venue createVenue(String location, int capacity, String purpose) throws InsertFailedException {
+		Venue venue = new Venue(location, capacity, purpose);
+		String sql = "insert into venues (location, capacity, purpose, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)";
+		venue.saveInstance(sql);
+		return venue;
 	}
 	
 	public ArrayList<Lesson> getLessons() {
@@ -39,8 +48,8 @@ public class Venue {
     	return lessons;
 	}
 	
-	public boolean addLesson(Lesson l) {
-		
+	public boolean addLesson(Lesson l) throws InsertFailedException {
+		return l.setColumn("venueId", (Long) this.getColumn("id"));
 	}
 	
 	public Object getColumn(String columnName) {
@@ -49,6 +58,38 @@ public class Venue {
 			return field.get(this);
 		} catch (Exception e) {
 			return null;
+		}
+	}
+	
+	public Boolean setColumn(String columnName, Object value) throws InsertFailedException {
+		DB db = new DB();
+		String sql = "update venues set " + columnName + " = ?";
+		HashMap<String, Object> result = db.update(db.getConn(), sql, columnName, value, this.id);
+		if ((boolean) result.get("status")) {
+			return true;
+		}else {
+			throw new InsertFailedException((String) result.get("message"));
+		}
+	}
+	
+	private boolean setId(Long id) {
+		try {
+			this.id = id;
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+	
+	private void saveInstance(String sql) throws InsertFailedException {
+		DB db = new DB();
+    	HashMap<String, Object> insertRs = 
+    			db.insert(db.getConn(), sql, this);
+    	db.db_close();
+    	if ((Boolean) insertRs.get("status")) {
+			this.setId((Long) insertRs.get("id"));
+		}else {
+			throw new InsertFailedException((String) insertRs.get("message"));
 		}
 	}
 }

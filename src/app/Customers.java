@@ -34,25 +34,24 @@ public class Customers {
 			break;
 		case "staff":
 			this.type = Type.Staff.toString();
+			break;
+		case "student":
+			this.type = Type.Student.toString();
+			break;
 		default:
 			this.type = Type.Student.toString();
 			break;
 		}
-		
 		java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		this.created_at = nowTime;
 		this.updated_at = nowTime;
 	}
 	
 	public static Customers createCustomer(String userNum, String password, String type) throws InsertFailedException {
-		try {
-			Customers customer = new Customers(userNum, password, type);
-			String sql = "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)";
-			customer.saveInstance(sql);
-			return customer;
-		} catch (InsertFailedException ie) {
-			throw ie;
-		}
+		Customers customer = new Customers(userNum, password, type);
+		String sql = "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)";
+		customer.saveInstance(sql);
+		return customer;
 	}
 	
 	public Object login(String userNum, String password) {
@@ -82,7 +81,18 @@ public class Customers {
 		}
 	}
 	
-	public boolean setId(Long id) {
+	public Boolean setColumn(String columnName, Object value) throws InsertFailedException {
+			DB db = new DB();
+			String sql = "update customers set " + columnName + " = ?";
+			HashMap<String, Object> result = db.update(db.getConn(), sql, columnName, value, this.id);
+			if ((boolean) result.get("status")) {
+				return true;
+			}else {
+				throw new InsertFailedException((String) result.get("message"));
+			}
+	}
+	
+	private boolean setId(Long id) {
 		try {
 			this.id = id;
 		} catch (Exception e) {
@@ -97,7 +107,7 @@ public class Customers {
     	HashMap<String, Object> insertRs = 
     			db.insert(db.getConn(), sql, this);
     	db.db_close();
-    	if ((Boolean) insertRs.get("status") == true) {
+    	if ((Boolean) insertRs.get("status")) {
 			this.setId((Long) insertRs.get("id"));
 		}else {
 			throw new InsertFailedException((String) insertRs.get("message"));

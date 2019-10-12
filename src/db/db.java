@@ -4,7 +4,7 @@ import cu_exceptions.InsertFailedException;
 
 import java.sql.*;
 import java.util.*;
-
+import java.util.concurrent.TimeUnit;
 import java.lang.reflect.Field;
 
 public class DB {
@@ -29,26 +29,6 @@ public class DB {
     	}
     	catch (Exception e) {
 			System.err.println("DB Error " + e);
-		}
-    }
-    
-    public void db_close() {
-    	try {
-            this.conn.close();
-		} 
-    	catch (SQLException se) {
-			se.printStackTrace();
-		}
-    	catch (Exception e) {
-    		System.err.println("Close DB " + e);
-    	}
-    	finally {
-    		// Close source          
-            try{
-                if(conn!=null) conn.close();
-            }catch(SQLException se){
-                se.printStackTrace();
-            }
 		}
     }
     
@@ -142,7 +122,7 @@ public class DB {
 			}
             
             int count = this.ptmt.executeUpdate();
-            System.out.println(count);
+
             if (count > 0) {
             	ResultSet rs = this.ptmt.getGeneratedKeys();
             	while (rs.next()) {
@@ -175,34 +155,125 @@ public class DB {
     	return result;
 	}
     
-    public boolean update(Connection conn, String sql, ArrayList<Object> parameters) {
-    	// Create preparedStatement
-    	//this.ptmt = conn.prepareStatement(sql);
-    	return false;
+    public HashMap<String, Object> update(Connection conn, String sql, String fieldName, Object value, Long id) {
+    	//    	
+    	HashMap<String, Object> result = new HashMap<>();
+    	result.put("status", false);
+    	result.put("message", "Updating failed");
+    	String upSql = sql + ", updated_at = ? where id = " + id + " and deleted_at is null";
+    	try {
+    		// Create preparedStatement
+            this.ptmt = conn.prepareStatement(upSql);  
+			this.ptmt.setObject(1, value);
+			java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+			this.ptmt.setObject(2, nowTime);
+            int count = this.ptmt.executeUpdate();
+    
+            if (count > 0) {
+            	result.put("status", true);
+            	result.put("message", "Updating successful");			
+            }
+            
+		}
+    	catch (SQLException se) {
+    		//se.printStackTrace();
+			result.put("status", false);
+			result.put("message", "SQL excetion occuring: " + se);
+		}
+    	catch (Exception e) {
+    		result.put("status", false);
+			result.put("message", "Excetion occuring: " + e);
+		}
+    	finally {
+    		try {
+				if (this.ptmt != null) this.ptmt.close();
+			} 
+			catch (Exception e2) {
+				System.out.println("Closing statement failed: " + e2);
+			}
+		}
+    	return result;
 	}
     
-    public boolean delete(Connection conn, String sql) {
-    	return false;
+    public HashMap<String, Object> delete(Connection conn, String tableName, Long id) {
+    	HashMap<String, Object> result = new HashMap<>();
+    	result.put("status", false);
+    	result.put("message", "Updating failed");
+    	String sql = "update " + tableName + " set deleted_at = ? where id = " + id;
+    	try {
+    		this.ptmt = conn.prepareStatement(sql);
+			java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+    		this.ptmt.setObject(1, nowTime);
+            int count = this.ptmt.executeUpdate();
+
+            if (count > 0) {
+            	result.put("status", true);
+            	result.put("message", "Updating successful");			
+            }
+		}
+    	catch (SQLException se) {
+    		//se.printStackTrace();
+			result.put("status", false);
+			result.put("message", "SQL excetion occuring: " + se);
+		}
+    	catch (Exception e) {
+    		result.put("status", false);
+			result.put("message", "Excetion occuring: " + e);
+		}
+    	finally {
+    		try {
+				if (this.ptmt != null) this.ptmt.close();
+			} 
+			catch (Exception e2) {
+				System.out.println("Closing statement failed: " + e2);
+			}
+		}
+    	return result;
     }
     
     public Connection getConn() {
 		return this.conn;
 	}
     
-    public static void main(String[] args) throws InsertFailedException {
-    	DB db = new DB();
-    	Customers.createCustomer("test9", "123456789", "");
-//    	HashMap<String, Object> insertRs = db.insert(db.conn, "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)", cus1);
-//    	System.out.println(insertRs.get("status"));
-//    	System.out.println(insertRs.get("id"));
-//    	System.out.println(insertRs.get("message"));
-    	HashMap<String, Object> result = db.search(db.conn, "Customers", "select userNum, id, password,type from customers where deleted_at is null");
-    	db.db_close();
-    	System.out.println(result.get("message"));
-    	ArrayList<Object> cuses = (ArrayList<Object>) result.get("data");
-    	for (int i = 0; i < cuses.size(); i++) {
-			System.out.println(((Customers) cuses.get(i)).getColumn("userNum"));
+    public void db_close() {
+    	try {
+            this.conn.close();
+		} 
+    	catch (SQLException se) {
+			se.printStackTrace();
+		}
+    	catch (Exception e) {
+    		System.err.println("Close DB " + e);
+    	}
+    	finally {
+    		// Close source          
+            try{
+                if(conn!=null) conn.close();
+            }catch(SQLException se){
+                se.printStackTrace();
+            }
 		}
     }
+    
+//    TODO  Function test code, need to delete before commit to assignment
+    
+//    public static void main(String[] args) throws InsertFailedException, InterruptedException {
+//    	DB db = new DB();
+//    	Customers customer = Customers.createCustomer("test12", "123456789", "");
+////    	HashMap<String, Object> insertRs = db.insert(db.conn, "insert into Customers (userNum, password, type, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)", cus1);
+////    	System.out.println(insertRs.get("status"));
+////    	System.out.println(insertRs.get("id"));
+////    	System.out.println(insertRs.get("message"));
+//    	HashMap<String, Object> result = db.search(db.conn, "Customers", "select userNum, id, password,type from customers where deleted_at is null");
+//    	System.out.println(result.get("message"));
+//    	ArrayList<Object> cuses = (ArrayList<Object>) result.get("data");
+//    	for (int i = 0; i < cuses.size(); i++) {
+//			System.out.println(((Customers) cuses.get(i)).getColumn("userNum"));
+//		}
+//    	TimeUnit.SECONDS.sleep(30);
+//    	customer.setColumn("password", "555555555");
+//    	db.db_close();
+//
+//    }
 }
  
