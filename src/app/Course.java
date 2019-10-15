@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import cu_exceptions.InsertFailedException;
 import db.DB;
-import db_files.dbFile;
 
 public class Course {
 	private long id;

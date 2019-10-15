@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import cu_exceptions.CuLoginException;
 import cu_exceptions.InsertFailedException;
 
 public class Customers {
@@ -54,9 +55,9 @@ public class Customers {
 		return customer;
 	}
 	
-	public Object login(String userNum, String password) {
+	public static Customers login(String userNum, String password) throws CuLoginException {
 		DB db = new DB();
-		String sql = "select userNum, id, password,type from customers where userNum =" + userNum + " and deleted_at is null";
+		String sql = "select userNum, id, password,type from customers where userNum = '" + userNum + "' and deleted_at is null";
     	HashMap<String, Object> result = db.search(db.getConn(), "Customers", sql);
     	db.db_close();
     	if ((Boolean) result.get("status") == true) {
@@ -65,10 +66,10 @@ public class Customers {
         	if (user.getColumn("password").equals(password)) {
 				return user;
 			} else {
-				return "Wrong password!";
+				throw new CuLoginException("Wrong password!");
 			}
 		} else {
-			return "Wrong userNm!";
+			throw new CuLoginException("No userNum!");
 		}
 	}
 	

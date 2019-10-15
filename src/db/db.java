@@ -1,10 +1,6 @@
 package db;
-import app.*;
-import cu_exceptions.InsertFailedException;
-
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.lang.reflect.Field;
 
 public class DB {
@@ -82,9 +78,15 @@ public class DB {
                 
 				data.add(obj);
     		}
-            result.put("status", true);
-            result.put("data", data);
-            result.put("message", "Query success!");
+            if (!data.isEmpty()) {
+            	result.put("status", true);
+                result.put("data", data);
+                result.put("message", "Query success!");
+			}else {
+				result.put("status", false);
+                result.put("data", data);
+                result.put("message", "No results!");
+			}
             return result;
 		} catch (Exception e) {
 			HashMap<String, Object> result = new HashMap<>();
