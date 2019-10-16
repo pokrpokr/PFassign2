@@ -28,7 +28,16 @@ public class Venue {
 		this.updated_at = nowTime;
 	}
 	
-	public static Venue createVenue(String location, int capacity, String purpose) throws InsertFailedException {
+	public static Venue createVenue(String[] args) throws InsertFailedException {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].isEmpty()) {
+				throw new InsertFailedException("Infos can not be empty");
+			}
+		}
+		String location = args[0]; 
+		String cap = args[1];
+		String purpose = args[2];
+		int capacity = Integer.parseInt(cap);
 		Venue venue = new Venue(location, capacity, purpose);
 		String sql = "insert into venues (location, capacity, purpose, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)";
 		venue.saveInstance(sql);

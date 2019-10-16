@@ -30,10 +30,30 @@ public class Course {
 	}
 	
 	public static Course createCourse(String[] args) throws InsertFailedException {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].isEmpty()) {
+				throw new InsertFailedException("Infos can not be empty");
+			}
+		}
 		Course course = new Course(args);
-		String sql = "insert into course (courseId, name, objective, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)";
+		String sql = "insert into courses (courseId, name, objective, created_at, updated_at, deleted_at) values(?,?,?,?,?,?)";
 		course.saveInstance(sql);
 		return course;
+	}
+	
+	public static ArrayList<Course> courses() throws SQLException {
+		ArrayList<Course> courses = new ArrayList<>();
+		DB db = new DB();
+		String sql = "select * from courses where deleted_at is null";
+		HashMap<String, Object> result = db.search(db.getConn(), "Course", sql);
+		if ((boolean) result.get("status") == true) {
+			for (int i = 0; i < ((ArrayList<Object>) result.get("data")).size(); i++) {
+				courses.add(i, (Course) ((ArrayList<Object>) result.get("data")).get(i));
+			}
+			return courses;
+		} else {
+			throw new SQLException((String) result.get("message"));
+		}
 	}
 	
 	public boolean createOffering(int maxNum) throws InsertFailedException, SQLException {
@@ -43,8 +63,7 @@ public class Course {
 	    if ((boolean) result.get("status") == true) {
 			int count = ((ArrayList<Object>) result.get("data")).size();
 			if (count ==1) {
-				System.err.println("Already created offering!");
-				return false;
+				throw new SQLException("Already created offering!");
 			}
 		} else {
 			throw new SQLException((String) result.get("message"));

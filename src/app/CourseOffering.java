@@ -19,8 +19,8 @@ public class CourseOffering {
 	public CourseOffering() {}
 	
 	public CourseOffering(int maxNum, Course course) {
-		this.maxNum = maxNum;
 		this.courseId = (Long) course.getColumn("id");
+		this.maxNum = maxNum;
 		java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		this.created_at = nowTime;
 		this.updated_at = nowTime;
@@ -31,6 +31,21 @@ public class CourseOffering {
 		String sql = "insert into cos (courseId, maxNum, created_at, updated_at, deleted_at) values(?,?,?,?,?)";
 		co.saveInstance(sql);
 		return co;
+	}
+	
+	public static ArrayList<CourseOffering> cos() throws SQLException {
+		ArrayList<CourseOffering> cos = new ArrayList<>();
+		DB db = new DB();
+		String sql = "select * from cos where deleted_at is null";
+		HashMap<String, Object> result = db.search(db.getConn(), "CourseOffering", sql);
+		if ((boolean) result.get("status") == true) {
+			for (int i = 0; i < ((ArrayList<Object>) result.get("data")).size(); i++) {
+				cos.add(i, (CourseOffering) ((ArrayList<Object>) result.get("data")).get(i));
+			}
+			return cos;
+		} else {
+			throw new SQLException((String) result.get("message"));
+		}
 	}
 	
 	public Lesson addLecture(int day, double start, double dur) throws Exception {

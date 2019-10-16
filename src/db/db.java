@@ -83,7 +83,7 @@ public class DB {
                 result.put("data", data);
                 result.put("message", "Query success!");
 			}else {
-				result.put("status", false);
+				result.put("status", true);
                 result.put("data", data);
                 result.put("message", "No results!");
 			}
@@ -131,7 +131,6 @@ public class DB {
     				result.put("status", true);
     				result.put("id", rs.getLong(1));
     				result.put("message", "Inserting sucessful");
-    				
     				return result;
 				}
 			}

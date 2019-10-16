@@ -30,6 +30,11 @@ public class Staff {
 	}
 	
 	public static Staff createStaff(String[] args) throws InsertFailedException {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].isEmpty()) {
+				throw new InsertFailedException("Infos can not be empty");
+			}
+		}
 		Staff staff = new Staff(args);
 		String sql = "insert into staffs (eNo, name, position, office, created_at, updated_at, deleted_at) values(?,?,?,?,?,?,?)";
 		staff.saveInstance(sql);
