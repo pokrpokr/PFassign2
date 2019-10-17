@@ -1,6 +1,7 @@
 package db;
 import java.sql.*;
 import java.util.*;
+import app.*;
 import java.lang.reflect.Field;
 
 public class DB {
@@ -111,10 +112,14 @@ public class DB {
     	result.put("status", false);
     	result.put("id", null);
     	result.put("message", "Inserting failed");
+ 
     	try {
     		// Create preparedStatement
             this.ptmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             Class<?> classN = object.getClass();
+            if (object instanceof app.Lecture || object instanceof app.Tutorial) {
+        		classN = Lesson.class;
+    		}
             Field[] fields = classN.getDeclaredFields();
             for (int i = 1; i < fields.length; i++) {
 				Field field = fields[i];

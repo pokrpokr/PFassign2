@@ -50,8 +50,8 @@ public class CourseOffering {
 	
 	public Lesson addLecture(int day, double start, double dur) throws Exception {
 		try {
-			int int_start = (int) start;
-			if (this.checkClash(day, int_start)) throw new ClashException("Time is clashed"); 
+			if (this.checkExist("Lecture")) throw new PreExistException("Lecture already exist");
+			if (this.checkClash(day, start)) throw new ClashException("Time is clashed"); 
 			Lesson lecture = Lecture.createLecture(day, start, dur, this);
 			return lecture;
 		} 
@@ -68,8 +68,7 @@ public class CourseOffering {
 	
 	public Lesson addTutorial(int day, double start, double dur) throws Exception {
 		try {
-			int int_start = (int) start;
-			if (this.checkClash(day, int_start)) throw new ClashException("Time is clashed"); 
+			if (this.checkClash(day, start)) throw new ClashException("Time is clashed"); 
 			Lesson tutorial = Tutorial.createTutorial(day, start, dur, this);
 			return tutorial;
 		} 
@@ -84,34 +83,53 @@ public class CourseOffering {
 		}
 	}
 	
-	public ArrayList<Lesson> lessons(int day, int start, int end) {
+	public ArrayList<Lesson> lessons() throws SQLException {
 		ArrayList<Lesson> lessons = new ArrayList<>();
 		DB db = new DB();
-		String sql = "select * from lessons where day = " + day + 
-				" and startHour >= " + Double.valueOf(start) + " and starHour <= " + Double.valueOf(end) + " and deleted_at is null";
+		String sql = "select * from lessons where coId = " + this.getColumn("id") + " and deleted_at is null";
     	HashMap<String, Object> result = db.search(db.getConn(), "Lesson", sql);
     	db.db_close();
-    	ArrayList<Object> rsData = (ArrayList<Object>) result.get("data");
-    	for (int i = 0; i < rsData.size(); i++) {
-			lessons.add((Lesson) rsData.get(i));
+    	if ((boolean) result.get("status")) {
+    		ArrayList<Object> rsData = (ArrayList<Object>) result.get("data");
+        	for (int i = 0; i < rsData.size(); i++) {
+    			lessons.add((Lesson) rsData.get(i));
+    		}
+        	return lessons;
+		}else {
+			throw new SQLException((String) result.get("message"));
 		}
-    	return lessons;
 	}
 	
-	public Boolean checkClash(int day, int start) throws SQLException {
+	public Boolean checkClash(int day, double start) throws SQLException {
 		DB db = new DB();
 		String sql = "select * from lessons where day = " 
-				+ " dayz" + " and startHour = " + Double.valueOf(start) + " and coId = " + this.getColumn("id") + " and deleted_at is null";
+				+ day + " and startHour <= " + start + " and endHour > " + start + " and coId = " + this.getColumn("id") + " and deleted_at is null";
     	HashMap<String, Object> result = db.search(db.getConn(), "Lesson", sql);
     	if ((Boolean) result.get("status") == true) {
     		ArrayList<Object> data = (ArrayList<Object>) result.get("data");
 			int count = data.size();
-			if (count > 1) {
+			if (count == 1) {
 				return true;
 			}
 			return false;
 		}else {
-			throw new SQLException("SQL is wrong");
+			throw new SQLException("SQL is wrong : " + ((String) result.get("message")));
+		}
+	}
+	
+	public boolean checkExist(String type) throws SQLException {
+		DB db = new DB();
+		String sql = "select * from lessons where type = '" + type + "' and coId = " + this.getColumn("id") + " and deleted_at is null";
+		HashMap<String, Object> result = db.search(db.getConn(), "Lesson", sql);
+		if ((Boolean) result.get("status")) {
+			ArrayList<Object> data = (ArrayList<Object>) result.get("data");
+			int count = data.size();
+			if (count == 1) {
+				return true;
+			}
+			return false;
+		} else {
+			throw new SQLException("SQL is wrong : " + ((String) result.get("message")));
 		}
 	}
 	

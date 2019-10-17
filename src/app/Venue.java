@@ -1,6 +1,7 @@
 package app;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class Venue {
 	private String purpose;
 	private Timestamp created_at;
 	private Timestamp updated_at;
-	private Timestamp delete_at = null;
+	private Timestamp deleted_at = null;
 	
 	public Venue() {}
 	
@@ -26,6 +27,23 @@ public class Venue {
 		java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		this.created_at = nowTime;
 		this.updated_at = nowTime;
+	}
+	
+	public static ArrayList<Venue> venues() throws SQLException {
+		ArrayList<Venue> venues = new ArrayList<>();
+		DB db = new DB();
+		String sql = "select * from venues where deleted_at is null";
+    	HashMap<String, Object> result = db.search(db.getConn(), "Venue", sql);
+    	db.db_close();
+    	if ((boolean) result.get("status")) {
+    		ArrayList<Object> rsData = (ArrayList<Object>) result.get("data");
+        	for (int i = 0; i < rsData.size(); i++) {
+        		venues.add((Venue) rsData.get(i));
+    		}
+        	return venues;
+		}else {
+			throw new SQLException((String) result.get("message"));
+		}
 	}
 	
 	public static Venue createVenue(String[] args) throws InsertFailedException {
@@ -44,17 +62,21 @@ public class Venue {
 		return venue;
 	}
 	
-	public ArrayList<Lesson> getLessons() {
+	public ArrayList<Lesson> getLessons() throws SQLException {
 		ArrayList<Lesson> lessons = new ArrayList<>();
 		DB db = new DB();
 		String sql = "select * from lessons where venueId = " + this.getColumn("venueId") + " and deleted_at is null";
     	HashMap<String, Object> result = db.search(db.getConn(), "Lesson", sql);
     	db.db_close();
-    	ArrayList<Object> rsData = (ArrayList<Object>) result.get("data");
-    	for (int i = 0; i < rsData.size(); i++) {
-			lessons.add((Lesson) rsData.get(i));
+    	if ((boolean) result.get("status")) {
+    		ArrayList<Object> rsData = (ArrayList<Object>) result.get("data");
+        	for (int i = 0; i < rsData.size(); i++) {
+    			lessons.add((Lesson) rsData.get(i));
+    		}
+        	return lessons;
+		}else {
+			throw new SQLException((String) result.get("message"));
 		}
-    	return lessons;
 	}
 	
 	public boolean addLesson(Lesson l) throws InsertFailedException {

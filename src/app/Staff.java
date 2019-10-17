@@ -1,7 +1,9 @@
 package app;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import cu_exceptions.InsertFailedException;
@@ -27,6 +29,23 @@ public class Staff {
 		java.sql.Timestamp nowTime = new Timestamp(System.currentTimeMillis());
 		this.created_at = nowTime;
 		this.updated_at = nowTime;
+	}
+	
+	public static ArrayList<Staff> staffs() throws SQLException {
+		ArrayList<Staff> staffs = new ArrayList<>();
+		DB db = new DB();
+		String sql = "select * from staffs where deleted_at is null";
+    	HashMap<String, Object> result = db.search(db.getConn(), "Staff", sql);
+    	db.db_close();
+    	if ((boolean) result.get("status")) {
+    		ArrayList<Object> rsData = (ArrayList<Object>) result.get("data");
+        	for (int i = 0; i < rsData.size(); i++) {
+        		staffs.add((Staff) rsData.get(i));
+    		}
+        	return staffs;	
+		}else {
+			throw new SQLException((String) result.get("message"));
+		}
 	}
 	
 	public static Staff createStaff(String[] args) throws InsertFailedException {

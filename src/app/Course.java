@@ -46,7 +46,7 @@ public class Course {
 		DB db = new DB();
 		String sql = "select * from courses where deleted_at is null";
 		HashMap<String, Object> result = db.search(db.getConn(), "Course", sql);
-		if ((boolean) result.get("status") == true) {
+		if ((boolean) result.get("status")) {
 			for (int i = 0; i < ((ArrayList<Object>) result.get("data")).size(); i++) {
 				courses.add(i, (Course) ((ArrayList<Object>) result.get("data")).get(i));
 			}
@@ -60,7 +60,7 @@ public class Course {
 		DB db = new DB();
 		String sql = "select id from cos where courseId = " + this.getColumn("id") + " and deleted_at is null";
 	    HashMap<String, Object> result = db.search(db.getConn(), "CourseOffering", sql);
-	    if ((boolean) result.get("status") == true) {
+	    if ((boolean) result.get("status")) {
 			int count = ((ArrayList<Object>) result.get("data")).size();
 			if (count ==1) {
 				throw new SQLException("Already created offering!");

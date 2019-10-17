@@ -7,7 +7,7 @@ import java.util.HashMap;
 import cu_exceptions.InsertFailedException;
 import db.DB;
 
-public abstract class Lesson {
+public class Lesson {
 	private long id;
 	private long staffId;//	private Staff staff;
 	private long venueId;//	private Venue venue;
@@ -40,6 +40,7 @@ public abstract class Lesson {
 		this.updated_at = nowTime;
 	}
 	
+	// TODO Refactor logic
 	protected boolean setStaff(Staff staff) throws InsertFailedException {
 		return this.setColumn("staffId", staff.getColumn("id"));
 	}
