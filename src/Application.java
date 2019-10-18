@@ -6,15 +6,31 @@ import cu_exceptions.*;
 public class Application {
 
 	public static void main(String[] args){
-		System.out.print("Welcome to enrolment system");
+		System.out.println("Welcome to enrolment system");
 			
 		Scanner scanner = new Scanner(System.in);
 		Customers currentUser = null;
 		currentUser = logIn(scanner, currentUser);
 		if (currentUser == null) {
 			System.out.println("Do you want to signup ? [Y:1, N:2]");
-			int signToken = scanner.nextInt();
-			scanner.nextLine();
+			int signToken = 0;
+			
+			do {
+				try {
+					signToken = 0;
+					signToken = scanner.nextInt();
+					scanner.nextLine();
+				} catch (InputMismatchException ime) {
+					System.err.println("Wrong input");
+					try {
+						Thread.sleep(3);
+					} catch (InterruptedException e) {}
+					System.out.println("Try again: ");
+					signToken = -1;
+					scanner.nextLine();
+				}
+			} while (signToken == -1);
+			
 			switch (signToken) {
 			case 1:
 				currentUser = signUp(scanner, currentUser);
@@ -107,13 +123,29 @@ public class Application {
 			} while (!sPassword.equals(cPassword));
 			String encodePassword = Base64.getEncoder().encodeToString(sPassword.getBytes());
 			System.out.println("Please choose your account type : {student: 1, staff: 2}");
-			int type = scanner.nextInt();
-			scanner.nextLine();
-			while (!(type == 1 || type == 2)) {
-				System.err.println("Type must be 'student' or 'staff'!");
-				System.out.println("Please enter your account type :");
+			int type = 0;
+			try {
 				type = scanner.nextInt();
 				scanner.nextLine();
+			} catch (Exception e) {
+				System.err.println("Wrong input");
+				try {
+					Thread.sleep(3);
+				} catch (InterruptedException ie) {}
+				scanner.nextLine();
+			}
+			 
+			while (!(type == 1 || type == 2)) {
+				System.err.println("Type must be 'student' or 'staff'!");
+				try {
+					Thread.sleep(3);
+				} catch (InterruptedException e1) {
+				}
+				System.out.println("Please enter your account type :");
+				try {
+					type = scanner.nextInt();
+					scanner.nextLine();
+				} catch (Exception e) {}
 				if(type != 1 || type != 2) {
 					System.err.println("Type wrong! Exit system");
 					System.exit(0);
@@ -169,8 +201,21 @@ public class Application {
 				System.out.println(choices[i]+": "+ (i+1));
 			}
 			System.out.println("Please enter your operation :");
-			opToken = scanner.nextInt();
-			scanner.nextLine();
+			do {
+				try {
+					opToken = scanner.nextInt();
+					scanner.nextLine();
+				} catch (InputMismatchException ime) {
+					System.err.println("Wrong input");
+					try {
+						Thread.sleep(3);
+					} catch (InterruptedException e) {}
+					System.out.println("Try again: ");
+					opToken = -1;
+					scanner.nextLine();
+				}
+			} while (opToken == -1);
+			
 			switch (opToken) {
 			case 1:
 				// Adding Course/CourseOffering/Lesson				
@@ -183,8 +228,20 @@ public class Application {
 					System.out.println(coChoiceStrings[i] + ": " + (i+1));
 					}
 					System.out.println("Enter your operation :");
-					cOperation = scanner.nextInt();
-					scanner.nextLine();
+					do {
+						try {
+							cOperation = scanner.nextInt();
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException e) {}
+							System.out.println("Try again: ");
+							cOperation = -1;
+							scanner.nextLine();
+						}
+					} while (cOperation == -1);
 				
 					switch (cOperation) {
 					case 1:
@@ -211,8 +268,21 @@ public class Application {
 								e.printStackTrace();
 							}
 							System.out.println("Want to continue to add course? [Y:1, N:2]");
-							ifContinue = scanner.nextInt();
-							scanner.nextLine();
+							do {
+								try {
+									ifContinue = scanner.nextInt();
+									scanner.nextLine();
+								} catch (InputMismatchException ime) {
+									System.err.println("Wrong input");
+									try {
+										Thread.sleep(3);
+									} catch (InterruptedException e) {}
+									System.out.println("Try again: ");
+									ifContinue = -1;
+									scanner.nextLine();
+								}
+							} while (ifContinue == -1);
+							
 						} while (ifContinue == 1);
 						break;
 					case 2:
@@ -232,6 +302,7 @@ public class Application {
 						int coifContinue = 0;
 						Course course = null;
 						do {
+							coifContinue = 0;
 							System.out.println("Please enter courseId: ");
 							String cId = scanner.nextLine();
 							for (int i = 0; i < courses.size(); i++) {
@@ -249,16 +320,42 @@ public class Application {
 									e.printStackTrace();
 								}
 								System.out.println("Want to search again?[Y:1, N:2]");
-								coifContinue = scanner.nextInt();
-								scanner.nextLine();
+								do {
+									try {
+										coifContinue = scanner.nextInt();
+										scanner.nextLine();
+									} catch (InputMismatchException ime) {
+										System.err.println("Wrong input");
+										try {
+											Thread.sleep(3);
+										} catch (InterruptedException e) {}
+										System.out.println("Try again: ");
+										coifContinue = -1;
+										scanner.nextLine();
+									}
+								} while (coifContinue == -1);
 							}
-						} while (coifContinue == 1);
-						if (coifContinue == 2) break;
-						// Input CourseOffering args						
-						do {
+							if (coifContinue == 1) continue;
+							if (coifContinue == 2) break;
+							// Input CourseOffering args						
+						
 							System.out.println("Please enter maxNum: ");
-							int maxNum = scanner.nextInt();
-							scanner.nextLine();
+							int maxNum = 0;
+							do {
+								try {
+									maxNum = scanner.nextInt();
+									scanner.nextLine();
+								} catch (InputMismatchException ime) {
+									System.err.println("Wrong input");
+									try {
+										Thread.sleep(3);
+									} catch (InterruptedException e) {}
+									System.out.println("Try again: ");
+									maxNum = -1;
+									scanner.nextLine();
+								}
+							} while (maxNum == -1);
+							 
 							try {
 								if (addCourseOffering(maxNum, course)) {
 									System.out.println("Adding course offering successful");
@@ -273,8 +370,21 @@ public class Application {
 								e.printStackTrace();
 							}
 							System.out.println("Want to continue to add course offering? [Y:1, N:2]");
-							coifContinue = scanner.nextInt();
-							scanner.nextLine();
+							do {
+								try {
+									coifContinue = scanner.nextInt();
+									scanner.nextLine();
+								} catch (InputMismatchException ime) {
+									System.err.println("Wrong input");
+									try {
+										Thread.sleep(3);
+									} catch (InterruptedException e) {}
+									System.out.println("Try again: ");
+									coifContinue = -1;
+									scanner.nextLine();
+								}
+							} while (coifContinue == -1);
+							
 						} while (coifContinue == 1);
 						break;
 					case 3:
@@ -306,6 +416,7 @@ public class Application {
 						CourseOffering co = null;
 						// Finding course
 						do {
+							leifcontinue = 0;
 							System.out.println("Please enter courseId: ");
 							String cId = scanner.nextLine();
 							for (int i = 0; i < courses.size(); i++) {
@@ -323,8 +434,21 @@ public class Application {
 									e.printStackTrace();
 								}
 								System.out.println("Want to continue search course?[Y:1, N:2]");
-								leifcontinue = scanner.nextInt();
-								scanner.nextLine();
+								do {
+									try {
+										leifcontinue = scanner.nextInt();
+										scanner.nextLine();
+									} catch (InputMismatchException ime) {
+										System.err.println("Wrong input");
+										try {
+											Thread.sleep(3);
+										} catch (InterruptedException e) {}
+										System.out.println("Try again: ");
+										leifcontinue = -1;
+										scanner.nextLine();
+									}
+								} while (leifcontinue == -1);
+							
 							}
 						} while (leifcontinue == 1);
 						if(leifcontinue == 2) break;
@@ -345,8 +469,21 @@ public class Application {
 									ie.printStackTrace();
 								}
 								System.out.println("Want to continue search course offering?[Y:1, N:2]");
-								leifcontinue = scanner.nextInt();
-								scanner.nextLine();
+								do {
+									try {
+										leifcontinue = scanner.nextInt();
+										scanner.nextLine();
+									} catch (InputMismatchException ime) {
+										System.err.println("Wrong input");
+										try {
+											Thread.sleep(3);
+										} catch (InterruptedException e) {}
+										System.out.println("Try again: ");
+										leifcontinue = -1;
+										scanner.nextLine();
+									}
+								} while (leifcontinue == -1);
+
 							}
 						} while (leifcontinue == 1);
 						if(leifcontinue == 2) break;
@@ -360,6 +497,7 @@ public class Application {
 						do {
 							try {
 								System.out.println("Please enter lesson's day(1 - 7) : ");
+								
 								day = scanner.nextInt();
 								scanner.nextLine();
 								if (day < 1 || day >7) {
@@ -379,15 +517,12 @@ public class Application {
 								}
 								
 							}
-							// TODO debug 
 							catch (InputMismatchException ime) {
-								System.err.println("Wrong input" + ime);
+								System.err.println("Wrong input");
 								try {
 									Thread.sleep(3);
-								} catch (InterruptedException ie) {
-									// TODO Auto-generated catch block
-									ie.printStackTrace();
-								}
+								} catch (InterruptedException ie) {}
+								scanner.nextLine();
 							}
 							catch (Exception e) {
 								System.err.println("Wrong input" + e);
@@ -399,15 +534,41 @@ public class Application {
 									
 								}
 								System.out.println("Want to continue to add lesson? [Y:1, N:2]");
-								coifContinue = scanner.nextInt();
-								scanner.nextLine();
+								do {
+									try {
+										coifContinue = scanner.nextInt();
+										scanner.nextLine();
+									} catch (InputMismatchException ime) {
+										System.err.println("Wrong input");
+										try {
+											Thread.sleep(3);
+										} catch (InterruptedException ie) {}
+										System.out.println("Try again: ");
+										coifContinue = -1;
+										scanner.nextLine();
+									}
+								} while (coifContinue == -1);
+								
 								continue;
 							}
 							// If wrong input or error is catched, break loop
 							if (day == -1 || dur == -1.0 ||  dur == -1.0) {
 								System.out.println("Want to input again? [Y:1, N:2]");
-								coifContinue = scanner.nextInt();
-								scanner.nextLine();
+								do {
+									try {
+										coifContinue = scanner.nextInt();
+										scanner.nextLine();
+									} catch (InputMismatchException ime) {
+										System.err.println("Wrong input");
+										try {
+											Thread.sleep(3);
+										} catch (InterruptedException ie) {}
+										System.out.println("Try again: ");
+										coifContinue = -1;
+										scanner.nextLine();
+									}
+								} while (coifContinue == -1);
+								
 								if (coifContinue == 1) {
 									continue;
 								} else {
@@ -415,8 +576,22 @@ public class Application {
 								}
 							}
 							System.out.println("Please enter lesson type : [Lecture: 1, Tutorial: 2]");
-							int type = scanner.nextInt();
-							scanner.nextLine();
+							int type = -1;
+							do {
+								try {
+									type = scanner.nextInt();
+									scanner.nextLine();
+								} catch (InputMismatchException ime) {
+									System.err.println("Wrong input");
+									try {
+										Thread.sleep(3);
+									} catch (InterruptedException ie) {}
+									System.out.println("Try again: ");
+									type = -1;
+									scanner.nextLine();
+								}
+							} while (type == -1);
+							
 							int lvIfcontinue = 0;
 							try {
 								Lesson lesson = addLesson(day, startHr, dur, type, co);
@@ -445,11 +620,16 @@ public class Application {
 											break;
 										}
 									}
+			
 									try {
+										if (venue == null) {
+											throw new NoResultException("No location!");
+										} 
 										switch (type) {
 										// Lecture: 1, Tutorial: 2									
 										case 1:
-											if ((int) venue.getColumn("capacity") > maxNum) {
+											int venueCap = (int) venue.getColumn("capacity");
+											if ( venueCap < maxNum) {
 												throw new CapacityException("Venue is too small for the lesson!");
 											} else {
 												if(venue.addLesson(lesson)) {
@@ -460,7 +640,7 @@ public class Application {
 										case 2:
 											int canAddNum = maxNum - sumVenNum;
 											if ((int) venue.getColumn("capacity") > canAddNum) {
-												throw new CapacityException("Venue is too small for the lesson!");
+												throw new CapacityException("Venue is too big for the lesson!");
 											} else {
 												if (venue.addLesson(lesson)) {
 													sumVenNum += (int) venue.getColumn("capacity");
@@ -469,6 +649,8 @@ public class Application {
 											}
 											break;
 										}
+									} catch (NoResultException nre) {
+										System.err.println(nre);
 									} catch (CapacityException ce) {
 										System.err.println(ce);
 										
@@ -480,11 +662,23 @@ public class Application {
 									} catch (Exception e) {
 									}
 									
-									System.out.println("Want to continue to add venue to lesson(lesson id: " + lesson.getColumn("id") + ")? [Y: 1, N: 2]");
-									lvIfcontinue = scanner.nextInt();
-									scanner.nextLine();
+									System.out.println("Want to continue to add venue to lesson(lesson id: " +((Lesson) lesson).getColumn("id") + ")? [Y: 1, N: 2]");
+									do {
+										try {
+											lvIfcontinue = scanner.nextInt();
+											scanner.nextLine();
+										} catch (InputMismatchException ime) {
+											System.err.println("Wrong input");
+											try {
+												Thread.sleep(3);
+											} catch (InterruptedException ie) {}
+											System.out.println("Try again: ");
+											lvIfcontinue = -1;
+											scanner.nextLine();
+										}
+									} while (lvIfcontinue == -1);
 									
-								} while (lvIfcontinue ==1 );
+								} while (lvIfcontinue == 1 );
 							} catch (Exception e) {
 								System.err.println("Adding lesson failed" + e);
 							}
@@ -495,8 +689,21 @@ public class Application {
 								ie.printStackTrace();
 							}
 							System.out.println("Want to continue to add lesson? [Y:1, N:2]");
-							coifContinue = scanner.nextInt();
-							scanner.nextLine();
+							do {
+								try {
+									coifContinue = scanner.nextInt();
+									scanner.nextLine();
+								} catch (InputMismatchException ime) {
+									System.err.println("Wrong input");
+									try {
+										Thread.sleep(3);
+									} catch (InterruptedException ie) {}
+									System.out.println("Try again: ");
+									coifContinue = -1;
+									scanner.nextLine();
+								}
+							} while (coifContinue == -1);
+							
 						} while (coifContinue == 1);
 						break;
 					case 4:
@@ -505,7 +712,20 @@ public class Application {
 						break;
 					}
 					System.out.println("Want to back to add course? [Y:0, N:3]");
-					cOperation = scanner.nextInt();
+					do {
+						try {
+							cOperation = scanner.nextInt();
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							cOperation = -1;
+							scanner.nextLine();
+						}
+					} while (cOperation == -1);
 				} while (cOperation == 0);
 				break;
 			case 2:
@@ -553,8 +773,20 @@ public class Application {
 						e.printStackTrace();
 					}
 					System.out.println("Want to continue to add staff? [Y:1, N:2]");
-					stifcontinue = scanner.nextInt();
-					scanner.nextLine();
+					do {
+						try {
+							stifcontinue = scanner.nextInt();
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							stifcontinue = -1;
+							scanner.nextLine();
+						}
+					} while (stifcontinue == -1);
 				} while (stifcontinue == 1);
 				break;
 			case 3:
@@ -600,8 +832,20 @@ public class Application {
 						e.printStackTrace();
 					}
 					System.out.println("Want to continue to add venue? [Y:1, N:2]");
-					veifcontinue = scanner.nextInt();
-					scanner.nextLine();
+					do {
+						try {
+							veifcontinue = scanner.nextInt();
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							veifcontinue = -1;
+							scanner.nextLine();
+						}
+					} while (veifcontinue == -1);
 				} while (veifcontinue == 1);
 				break;
 			case 4:
@@ -636,8 +880,21 @@ public class Application {
 							ie.printStackTrace();
 						}
 						System.out.println("Want to continue search staff?[Y:1, N:2]");
-						astIfcontinue = scanner.nextInt();
-						scanner.nextLine();
+						do {
+							try {
+								astIfcontinue = scanner.nextInt();
+								scanner.nextLine();
+							} catch (InputMismatchException ime) {
+								System.err.println("Wrong input");
+								try {
+									Thread.sleep(3);
+								} catch (InterruptedException ie) {}
+								System.out.println("Try again: ");
+								astIfcontinue = -1;
+								scanner.nextLine();
+							}
+						} while (astIfcontinue == -1);
+					
 					}
 				} while (astIfcontinue == 1);
 				if(astIfcontinue == 2) break;
@@ -669,6 +926,7 @@ public class Application {
 				CourseOffering co = null;
 				// Finding course
 				do {
+					
 					System.out.println("Please enter courseId: ");
 					String cId = scanner.nextLine();
 					for (int i = 0; i < courses.size(); i++) {
@@ -686,8 +944,21 @@ public class Application {
 							e.printStackTrace();
 						}
 						System.out.println("Want to continue search course?[Y:1, N:2]");
-						astIfcontinue = scanner.nextInt();
-						scanner.nextLine();
+						do {
+							try {
+								astIfcontinue = scanner.nextInt();
+								scanner.nextLine();
+							} catch (InputMismatchException ime) {
+								System.err.println("Wrong input");
+								try {
+									Thread.sleep(3);
+								} catch (InterruptedException ie) {}
+								System.out.println("Try again: ");
+								astIfcontinue = -1;
+								scanner.nextLine();
+							}
+						} while (astIfcontinue == -1);
+						
 					}
 				} while (astIfcontinue == 1);
 				if(astIfcontinue == 2) break;
@@ -708,8 +979,21 @@ public class Application {
 							ie.printStackTrace();
 						}
 						System.out.println("Want to continue search course offering?[Y:1, N:2]");
-						astIfcontinue = scanner.nextInt();
-						scanner.nextLine();
+						do {
+							try {
+								astIfcontinue = scanner.nextInt();
+								scanner.nextLine();
+							} catch (InputMismatchException ime) {
+								System.err.println("Wrong input");
+								try {
+									Thread.sleep(3);
+								} catch (InterruptedException ie) {}
+								System.out.println("Try again: ");
+								astIfcontinue = -1;
+								scanner.nextLine();
+							}
+						} while (astIfcontinue == -1);
+						
 					}
 				} while (astIfcontinue == 1);
 				if(astIfcontinue == 2) break;
@@ -750,8 +1034,22 @@ public class Application {
 									", Start: " + ((Double) lessons.get(i).getColumn("startHour"));
 							System.out.println(info + " -- Selection: " + (i+1));
 						}
-						int leNo = scanner.nextInt() - 1;
-						scanner.nextLine();
+						int leNo = -1;
+						do {
+							try {
+								leNo = scanner.nextInt() - 1;
+								scanner.nextLine();
+							} catch (InputMismatchException ime) {
+								System.err.println("Wrong input");
+								try {
+									Thread.sleep(3);
+								} catch (InterruptedException ie) {}
+								System.out.println("Try again: ");
+								leNo = -1;
+								scanner.nextLine();
+							}
+						} while (leNo == -1);
+						
 						try {
 							lesson = lessons.get(leNo);
 						} catch (Exception e) {
@@ -772,8 +1070,21 @@ public class Application {
 							ie.printStackTrace();
 						}
 						System.out.println("Want to continue search lessons? [Y:1, N:2]");
-						selIfcontinue = scanner.nextInt();
-						scanner.nextLine();
+						do {
+							try {
+								selIfcontinue = scanner.nextInt();
+								scanner.nextLine();
+							} catch (InputMismatchException ime) {
+								System.err.println("Wrong input");
+								try {
+									Thread.sleep(3);
+								} catch (InterruptedException ie) {}
+								System.out.println("Try again: ");
+								selIfcontinue = -1;
+								scanner.nextLine();
+							}
+						} while (selIfcontinue == -1);
+						
 					}
 				} while (selIfcontinue == 1);
 				if (selIfcontinue == 2) break;
@@ -792,8 +1103,21 @@ public class Application {
 						}
 					}
 					System.out.println("Want to continue to add staff? [Y:1, N:2]");
-					selIfcontinue = scanner.nextInt();
-					scanner.nextLine();
+					do {
+						try {
+							selIfcontinue = scanner.nextInt();
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							selIfcontinue = -1;
+							scanner.nextLine();
+						}
+					} while (selIfcontinue == -1);
+					
 				} while (selIfcontinue == 1);
 				try {
 					Thread.sleep(5);
@@ -804,6 +1128,7 @@ public class Application {
 				break;
 			case 5:
 				//TODO Adding venue manually
+				System.out.println("Not finished");
 				break;
 			case 6:
 				return;
@@ -864,8 +1189,21 @@ public class Application {
 			for (int i = 0; i < operations.length; i++) {
 				System.out.println(operations[i] + ": " + (i+1));
 			}
-			int op = scanner.nextInt();
-			scanner.nextLine();
+			
+			int op = 0;
+			try {
+				op = scanner.nextInt();
+				scanner.nextLine();
+			} catch (InputMismatchException ime) {
+				System.err.println("Wrong input");
+				try {
+					Thread.sleep(3);
+				} catch (InterruptedException ie) {}
+				System.out.println("Try again: ");
+				op = 0;
+				scanner.nextLine();
+			}
+			
 			switch (op) {
 			case 1:
 				//Enrol CO
@@ -926,8 +1264,22 @@ public class Application {
 					for (int i = 0; i < canEnrol.size(); i++) {
 						System.out.println(canEnrol.get(i));
 					}
-					int offeringNum = scanner.nextInt() - 1;
-					scanner.nextLine();
+					int offeringNum = -1;
+					do {
+						try {
+							offeringNum = scanner.nextInt() - 1;
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							offeringNum = -1;
+							scanner.nextLine();
+						}
+					} while (offeringNum == -1);
+					
 					
 					CourseOffering selectedOffering = cos.get(offeringNum);
 					Lesson selectedLecture = null;
@@ -948,8 +1300,21 @@ public class Application {
 							ie.printStackTrace();
 						}
 						System.out.println("Re enrol COs? [Y:1, N:2]");
-						crtEnrolIfcontinue = scanner.nextInt();
-						scanner.nextLine();
+						do {
+							try {
+								crtEnrolIfcontinue = scanner.nextInt();
+								scanner.nextLine();
+							} catch (InputMismatchException ime) {
+								System.err.println("Wrong input");
+								try {
+									Thread.sleep(3);
+								} catch (InterruptedException ie) {}
+								System.out.println("Try again: ");
+								crtEnrolIfcontinue = -1;
+								scanner.nextLine();
+							}
+						} while (crtEnrolIfcontinue == -1);
+						
 						if (crtEnrolIfcontinue == 1) {
 							continue;
 						}else {
@@ -968,8 +1333,21 @@ public class Application {
 					}
 					System.out.println("Enrolling sucessful");
 					System.out.println("Continue enrol COs? [Y:1, N:2]");
-					crtEnrolIfcontinue = scanner.nextInt();
-					scanner.nextLine();
+					do {
+						try {
+							crtEnrolIfcontinue = scanner.nextInt();
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							crtEnrolIfcontinue = -1;
+							scanner.nextLine();
+						}
+					} while (crtEnrolIfcontinue == -1);
+					
 				} while (crtEnrolIfcontinue == 1);
 				break;
 			case 2:
@@ -1002,8 +1380,21 @@ public class Application {
 							e1.printStackTrace();
 						}
 						System.out.println("Try again? [Y: 1, N: 2]");
-						enIfcontinue = scanner.nextInt();
-						scanner.nextLine();
+						do {
+							try {
+								enIfcontinue = scanner.nextInt();
+								scanner.nextLine();
+							} catch (InputMismatchException ime) {
+								System.err.println("Wrong input");
+								try {
+									Thread.sleep(3);
+								} catch (InterruptedException ie) {}
+								System.out.println("Try again: ");
+								enIfcontinue = -1;
+								scanner.nextLine();
+							}
+						} while (enIfcontinue == -1);
+						
 						break;
 					}
 				} while (enIfcontinue == 1);
@@ -1077,8 +1468,22 @@ public class Application {
 						String infos = "Day: " + tus.get(i).getColumn("day") + " Start: " + tus.get(i).getColumn("startHour") + " -- Selection: " + (i + 1);
 						System.out.println(infos);
 					}
-					int tuNum = scanner.nextInt() - 1;
-					scanner.nextLine();
+					int tuNum = -1;
+					do {
+						try {
+							tuNum = scanner.nextInt() - 1;
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							tuNum = -1;
+							scanner.nextLine();
+						}
+					} while (tuNum == -1);
+					
 					Lesson lesson = tus.get(tuNum);
 					int enroledNum = Enrolment.enrolNum(lesson);
 					if (enroledNum == -1) {
@@ -1121,8 +1526,21 @@ public class Application {
 						}
 					}
 					System.out.println("Want to continue to enrol tutorial?: [Y:1, N:2]");
-					enIfcontinue = scanner.nextInt();
-					scanner.nextLine();
+					do {
+						try {
+							enIfcontinue = scanner.nextInt();
+							scanner.nextLine();
+						} catch (InputMismatchException ime) {
+							System.err.println("Wrong input");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException ie) {}
+							System.out.println("Try again: ");
+							enIfcontinue = -1;
+							scanner.nextLine();
+						}
+					} while (enIfcontinue == -1);
+					
 				} while (enIfcontinue == 1);
 				stIfcontinue = 1;
 				break;
@@ -1135,8 +1553,21 @@ public class Application {
 					e.printStackTrace();
 				}
 				System.out.println("Wanna go back?[Y:1, N:2]");
-				stIfcontinue =scanner.nextInt();
-				scanner.nextLine();
+				do {
+					try {
+						stIfcontinue = scanner.nextInt();
+						scanner.nextLine();
+					} catch (InputMismatchException ime) {
+						System.err.println("Wrong input");
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException ie) {}
+						System.out.println("Try again: ");
+						stIfcontinue = -1;
+						scanner.nextLine();
+					}
+				} while (stIfcontinue == -1);
+				
 				break;
 			case 4:
 				stIfcontinue = 2;
@@ -1152,8 +1583,22 @@ public class Application {
 		System.out.println("Welcome " + staff.getColumn("userNum"));
 		System.out.println("List Time Table: 1 ");
 		System.out.println("Logout:          2 ");
-		int opNum = scanner.nextInt();
-		scanner.nextLine();
+		int opNum = -1;
+		do {
+			try {
+				opNum = scanner.nextInt() - 1;
+				scanner.nextLine();
+			} catch (InputMismatchException ime) {
+				System.err.println("Wrong input");
+				try {
+					Thread.sleep(3);
+				} catch (InterruptedException ie) {}
+				System.out.println("Try again: ");
+				opNum = -1;
+				scanner.nextLine();
+			}
+		} while (opNum == -1);
+		
 		switch (opNum) {
 		case 1:
 			ArrayList<Staff> staffs = new ArrayList<>();
