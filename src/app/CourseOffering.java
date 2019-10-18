@@ -48,6 +48,21 @@ public class CourseOffering {
 		}
 	}
 	
+	public Lesson lecture() throws NoResultException, SQLException {
+		DB db = new DB();
+		String sql = "select * from lessons where coId = " + this.getColumn("id") + " and type = 'Lecture' and deleted_at is null";
+		HashMap<String, Object> result = db.search(db.getConn(), "Lesson", sql);
+		if ((boolean) result.get("status")) {
+			if (((ArrayList<Object>) result.get("data")).size() == 0) {
+				throw new NoResultException("This Course Offering hasn't add Lecture");
+			}
+			Lesson lecture = (Lesson) ((ArrayList<Object>) result.get("data")).get(0);
+			return lecture;
+		}else {
+			throw new SQLException((String) result.get("message"));
+		}
+	}
+	
 	public Lesson addLecture(int day, double start, double dur) throws Exception {
 		try {
 			if (this.checkExist("Lecture")) throw new PreExistException("Lecture already exist");

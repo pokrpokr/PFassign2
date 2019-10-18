@@ -1,11 +1,13 @@
 package app;
 import db.DB;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import cu_exceptions.CuLoginException;
 import cu_exceptions.InsertFailedException;
+import cu_exceptions.NoResultException;
 
 public class Customers {
 	private long id;// Integer
@@ -62,6 +64,9 @@ public class Customers {
     	db.db_close();
     	if ((Boolean) result.get("status") == true) {
         	ArrayList<Object> users = (ArrayList<Object>) result.get("data");
+        	if (users.size() == 0) {
+        		throw new CuLoginException("No userNum!");
+			}
         	Customers user = (Customers) users.get(0);
         	if (user.getColumn("password").equals(password)) {
 				return user;
@@ -70,6 +75,40 @@ public class Customers {
 			}
 		} else {
 			throw new CuLoginException("No userNum!");
+		}
+	}
+	
+	//Student operations
+	public Enrolment enrolCourseOffering(CourseOffering co, Lesson lecture) throws InsertFailedException {
+		try {
+			Enrolment enrol = Enrolment.creatEnrolment(this, co, lecture);
+			return enrol;
+		} 
+		catch (InsertFailedException ie) {
+			throw ie;		
+		}
+	}
+	//Enrol Tutorial
+	public boolean enrolTutorial(Enrolment enrolment, Lesson tu) throws InsertFailedException {
+		return enrolment.enrolTutorial(tu);
+	}
+	//Finding student's enrolments
+	public ArrayList<Enrolment> enrolments() throws SQLException, NoResultException {
+		ArrayList<Enrolment> enrolments = new ArrayList<>();
+		DB db = new DB();
+		String sql = "select * from enrolments where studentId = " + this.getColumn("id") + " and deleted_at is null";
+		HashMap<String, Object> result = db.search(db.getConn(), "Enrolment", sql);
+		if ((boolean) result.get("status")) {
+			int count = ((ArrayList<Object>) result.get("data")).size();
+			if ( count == 0) {
+				throw new NoResultException((String) result.get("message"));
+			}
+			for (int i = 0; i < count; i++) {
+				enrolments.add( i, (Enrolment) ((ArrayList<Object>) result.get("data")).get(i) );
+			}
+			return enrolments;
+		} else {
+			throw new SQLException((String) result.get("message"));
 		}
 	}
 	

@@ -28,6 +28,7 @@ public class Application {
 		
 		switch ((String) currentUser.getColumn("type")) {
 		case "Student":
+			studentMenu(scanner, currentUser);
 			break;
 		case "Staff":
 			break;
@@ -40,6 +41,7 @@ public class Application {
 			break;
 		}
 		scanner.close();
+		System.out.println("Have a good day " + currentUser.getColumn("userNum"));
 		System.exit(0);
 	}
 	
@@ -141,8 +143,7 @@ public class Application {
 	private static void adminMenu(Scanner scanner) {
 		int opToken = 0;
 		do {
-			String[] choices = new String[] {"Add Course", "Add Staff", "Add Venue", "Assign Staff to Lesson", 
-					"Enrol Student in Course Offering", "Register Student in Tutorial", "Assign venue manually", "Exit system"};
+			String[] choices = new String[] {"Add Course", "Add Staff", "Add Venue", "Assign Staff to Lesson", "Assign venue manually", "Exit system"};
 			for (int i = 0; i < choices.length; i++) {
 				System.out.println(choices[i]+": "+ (i+1));
 			}
@@ -710,6 +711,17 @@ public class Application {
 				Lesson lesson = null;
 				do {
 					do {
+						if (lessons.size() == 0) {
+							System.err.println("No lessons!");
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							selIfcontinue = 2;
+							break;
+						}
 						System.out.println("Please choose your lesson :");
 						for (int i = 0; i < lessons.size(); i++) {
 							String info = ((String) cour.getColumn("name")) + ": " + 
@@ -717,22 +729,18 @@ public class Application {
 									", Start: " + ((Double) lessons.get(i).getColumn("startHour"));
 							System.out.println(info + " -- Selection: " + (i+1));
 						}
-						int leNo = scanner.nextInt();
+						int leNo = scanner.nextInt() - 1;
 						scanner.nextLine();
-						
-						switch (leNo) {
-						case 1:
-							lesson = lessons.get(1);
-							break;
-						case 2:
-							lesson = lessons.get(2);
-							break;
-						default:
-							System.out.println("No choice, back to select lesson");
+						try {
+							lesson = lessons.get(leNo);
+						} catch (Exception e) {
+							System.out.println("Something wrong, back to select lesson");
 							selIfcontinue = 1;
 							break;
 						}
 					} while (selIfcontinue == 1);
+					
+					if (selIfcontinue == 2) break;
 					
 					if (lesson == null) {
 						System.err.println("Lesson does not exist");
@@ -774,20 +782,14 @@ public class Application {
 				}
 				break;
 			case 5:
-				//Enrol Student in Course Offering				
-				break;
-			case 6:
-				//Register Student in Tutorial
-				break;
-			case 7:
 				//TODO Adding venue manually
 				break;
-			case 8:
+			case 6:
 				return;
 			default:
 				break;
 			}
-		} while (!(opToken == 8 || opToken == 0));
+		} while (!(opToken == 6 || opToken == 0));
 	}
 	
 	private static boolean addCourse(String[] args) {
@@ -831,5 +833,285 @@ public class Application {
 	
 	private static boolean setStaff(Staff staff, Lesson lesson) throws InsertFailedException {
 		return staff.assign(lesson);
+	}
+
+	private static void studentMenu(Scanner scanner, Customers student) {
+		int stIfcontinue = 0;
+		do {
+			System.out.println("Welcome " + student.getColumn("userNum"));
+			String[] operations = new String[] {"Enrol Course Offering", "Register Tutorial", "Logout"};
+			for (int i = 0; i < operations.length; i++) {
+				System.out.println(operations[i] + ": " + (i+1));
+			}
+			int op = scanner.nextInt();
+			scanner.nextLine();
+			switch (op) {
+			case 1:
+				//Enrol CO
+				// Do-While symbol
+				int crtEnrolIfcontinue = 0;
+				//Finding can be enroled courses(cos)				
+				ArrayList<Course> courses = new ArrayList<>();
+				ArrayList<CourseOffering> cos = new ArrayList<>();
+				
+				try {
+					courses = Course.courses();
+					cos = CourseOffering.cos();
+					if (courses.size() == 0 || cos.size() ==0) {
+						throw new NoResultException("No CourseOffering can be enroled");
+					}
+				}
+				catch (NoResultException | SQLException e) {
+					System.err.println(e);
+					// Waitting err finish output
+					try {
+						Thread.sleep(3);
+					} catch (InterruptedException ie) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					crtEnrolIfcontinue = 2;
+					break;
+				}
+				if (crtEnrolIfcontinue == 2) break;
+				
+				do {
+					// List Course Offering Infos		
+					ArrayList<String> canEnrol = new ArrayList<>();
+					for (int i = 0; i < courses.size(); i++) {
+						for (int j = 0; j < cos.size(); j++) {
+							// Format co infos						
+							if (cos.get(j).getColumn("courseId").equals(courses.get(i).getColumn("id"))) {
+								Lesson lecture = null;
+								try {
+									lecture = cos.get(j).lecture();
+								} catch (NoResultException | SQLException e) {
+									continue;
+								}
+								if (lecture == null) continue;
+								
+								String info ="Course Info:" + courses.get(i).getColumn("name") + ", CourseId: " + courses.get(i).getColumn("courseId") +
+										", Lecture time(Day-StartHour): " + lecture.getColumn("day") + "-" + lecture.getColumn("startHour") +
+										", CO number(select): " + (j+1);
+							
+								canEnrol.add(info);
+								break;
+							}
+						}
+					}
+					
+					//List 
+					System.out.println("Please choose Course Offering: ");
+					for (int i = 0; i < canEnrol.size(); i++) {
+						System.out.println(canEnrol.get(i));
+					}
+					int offeringNum = scanner.nextInt() - 1;
+					scanner.nextLine();
+					
+					CourseOffering selectedOffering = cos.get(offeringNum);
+					Lesson selectedLecture = null;
+					try {
+						selectedLecture = selectedOffering.lecture();
+					} catch (NoResultException | SQLException e2) {
+						// Do nothing due to it was catched at the above step
+					}
+					try {
+						Enrolment.checkClash(student, selectedOffering);
+						student.enrolCourseOffering(selectedOffering, selectedLecture);
+					}catch (ClashException ce) {
+						System.err.println(ce);
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException ie) {
+							// TODO Auto-generated catch block
+							ie.printStackTrace();
+						}
+						System.out.println("Re enrol COs? [Y:1, N:2]");
+						crtEnrolIfcontinue = scanner.nextInt();
+						scanner.nextLine();
+						if (crtEnrolIfcontinue == 1) {
+							continue;
+						}else {
+							break;
+						}
+					} 
+					catch (Exception e) {
+						System.err.println(e);
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException ie) {
+							// TODO Auto-generated catch block
+							ie.printStackTrace();
+						}
+						break;
+					}
+					System.out.println("Enrolling sucessful");
+					System.out.println("Continue enrol COs? [Y:1, N:2]");
+					crtEnrolIfcontinue = scanner.nextInt();
+					scanner.nextLine();
+				} while (crtEnrolIfcontinue == 1);
+				break;
+			case 2:
+				//Enrol Tutorial
+				int enIfcontinue = 0;
+				//Checking student whether has enrolments
+				ArrayList<Enrolment> enrolments = new ArrayList<>();
+				do {
+					
+					try {
+						enrolments = student.enrolments();
+					}
+					catch (NoResultException nre) {
+						System.err.println(nre);
+						// Waitting err finish output
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						break;
+					}
+					catch (SQLException e) {
+						System.err.println("Something wrong: " + e);
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						System.out.println("Try again? [Y: 1, N: 2]");
+						enIfcontinue = scanner.nextInt();
+						scanner.nextLine();
+						break;
+					}
+				} while (enIfcontinue == 1);
+				// 2 Exit system
+				if (enIfcontinue == 2) break; 
+				
+				//Enrol preparation
+				do {
+					//List student's enrolments
+					if (enrolments.size() == 0) {
+						System.err.println("No enrolments");
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						enIfcontinue = 2;
+						break;
+					}
+					
+					//Finding Tutorial
+					Enrolment el = null;
+					CourseOffering co = null;
+					ArrayList<Lesson> lessons = new ArrayList<>();
+					for (int i = 0; i < enrolments.size(); i++) {
+						 el = enrolments.get(i);
+						try {
+							co = el.getCourseOffering();
+							lessons = co.lessons();
+						} catch (NoResultException nre) {
+							System.err.println(nre);
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							break;
+						} catch (SQLException se) {
+							System.err.println(se);
+							try {
+								Thread.sleep(3);
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							break;
+						}
+					}
+					ArrayList<Tutorial> tus = new ArrayList<>();
+					for (int i = 0; i < lessons.size(); i++) {
+						if (lessons.get(i).getColumn("type").equals("Tutorial")) {
+								tus.add((Tutorial) lessons.get(i));
+							}
+						}
+					if (el == null || co == null || lessons.size() == 0 || tus.size() ==0) {
+						System.err.println("Can't find tutorial!");
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						enIfcontinue = 2;
+						break;
+					}
+					//Choose tutorial
+					System.out.println("Choose tutorial: ");
+					for (int i = 0; i < tus.size(); i++) {
+						String infos = "Day: " + tus.get(i).getColumn("day") + " Start: " + tus.get(i).getColumn("startHour") + " -- Selection: " + (i + 1);
+						System.out.println(infos);
+					}
+					int tuNum = scanner.nextInt() - 1;
+					scanner.nextLine();
+					Lesson lesson = tus.get(tuNum);
+					int enroledNum = Enrolment.enrolNum(lesson);
+					if (enroledNum == -1) {
+						System.err.println("Something wrong");
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						enIfcontinue = 2;
+						break;
+					}
+					int maxNum = (int) co.getColumn("maxNum");
+					
+					if ((maxNum - enroledNum) < 0) {
+						System.err.println("Lesson is full! Can not enrol!");
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						System.out.println("Back to select lessons");
+						enIfcontinue = 1;
+						break;
+					}
+					// Enrol tutorial
+					try {
+						if(student.enrolTutorial(el, lesson)) {
+							System.out.println("Enrolling successful");
+						}
+					} catch (Exception e) {
+						System.err.println("Enrolling failed");
+						try {
+							Thread.sleep(3);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					System.out.println("Want to continue to enrol tutorial?: [Y:1, N:2]");
+					enIfcontinue = scanner.nextInt();
+					scanner.nextLine();
+				} while (enIfcontinue == 1);
+				stIfcontinue = 1;
+				break;
+			case 3:
+				stIfcontinue = 2;
+				break;
+			default:
+				stIfcontinue = 1;
+				break;
+			}
+		} while (stIfcontinue == 1);
 	}
 }

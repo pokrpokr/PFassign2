@@ -59,6 +59,9 @@ public class DB {
     		case "Venue":
     			className = "app.Venue";
     			break;
+    		case "Enrolment":
+    			className = "app.Enrolment";
+    			break;
     		default:
     			result.put("status", false);
     			result.put("data", new ArrayList<>());

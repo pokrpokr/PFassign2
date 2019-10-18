@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS `customers`;
 DROP TABLE IF EXISTS `lessons`;
 DROP TABLE IF EXISTS `staffs`;
 DROP TABLE IF EXISTS `venues`;
+DROP TABLE IF EXISTS `enrolments`;
 
 CREATE TABLE `cos` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -80,3 +81,15 @@ CREATE TABLE `venues` (
   UNIQUE KEY `location_UNIQUE` (`location`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `enrolments` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `studentId` int(11) NOT NULL,
+  `coId` int(11) NOT NULL,
+  `lectureId` int(11) NOT NULL,
+  `tutorialId` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL,
+  `updated_at` timestamp NOT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
