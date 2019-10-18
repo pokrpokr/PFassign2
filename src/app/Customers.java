@@ -112,6 +112,63 @@ public class Customers {
 		}
 	}
 	
+	//Timetable
+	public void getTimeTable() {
+		ArrayList<Enrolment> enrolments = new ArrayList<>();
+		ArrayList<CourseOffering> cos = new ArrayList<>();
+		ArrayList<Lesson> lessons = new ArrayList<>();
+		try {
+			enrolments = this.enrolments();
+			for (int i = 0; i < enrolments.size(); i++) {
+				cos.add(enrolments.get(i).getCourseOffering());
+			}
+			for (int i = 0; i < cos.size(); i++) {
+				ArrayList<Lesson> ls = cos.get(i).lessons();
+				for (int j = 0; j < ls.size(); j++) {
+					lessons.add(ls.get(j));
+				}
+			}
+			for (int i = 0; i < lessons.size(); i++) {
+				String timeInfoString = "Day: " + lessons.get(i).getColumn("day") + ", Start: " + lessons.get(i).getColumn("startHour") + 
+						", End: " + lessons.get(i).getColumn("endHour") + ", Type: " + lessons.get(i).getColumn("type");
+				Venue venue = null;
+				try {
+					venue = lessons.get(i).getVenue();
+				}
+				catch (NoResultException nre) {
+					System.err.println(nre);
+					try {
+						Thread.sleep(3);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					continue;
+				}
+				catch (SQLException e) {
+					System.err.println(e);
+					try {
+						Thread.sleep(3);
+					} catch (InterruptedException ie) {
+						// TODO Auto-generated catch block
+						ie.printStackTrace();
+					}
+					return;
+				}
+				
+				timeInfoString += ", location: " + venue.getColumn("location");
+				System.out.println("**************************");
+				System.out.println(timeInfoString);
+			}
+		}
+		catch (NoResultException nre) {
+			System.err.println("No Time Table");
+		}
+		catch (Exception e) {
+			System.err.println("Student timetable error:" + e);
+		}
+	}
+	
 	public Object getColumn(String columnName) {
 		try {
 			Field field = this.getClass().getDeclaredField(columnName);

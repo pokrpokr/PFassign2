@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import cu_exceptions.InsertFailedException;
+import cu_exceptions.NoResultException;
 import db.DB;
 
 public class Staff {
@@ -58,6 +59,57 @@ public class Staff {
 		String sql = "insert into staffs (eNo, name, position, office, created_at, updated_at, deleted_at) values(?,?,?,?,?,?,?)";
 		staff.saveInstance(sql);
 		return staff;
+	}
+	
+	public void getTimetable() {
+		ArrayList<Lesson> lessons = new ArrayList<>();
+		DB db = new DB();
+		String sql = "select day, startHour, endHour, type from lessons where staffId = " + this.getColumn("id") + " and deleted_at is null";
+		HashMap<String, Object> results = db.search(db.getConn(), "Lesson", sql);
+		if ((boolean) results.get("status")) {
+			ArrayList<Object> data = (ArrayList<Object>) results.get("data");
+			if(data.size() == 0) {
+				System.err.println("No TimeTable");
+				return;
+			}
+			for (int i = 0; i < data.size(); i++) {
+				lessons.add(i, (Lesson) data.get(i));
+			}
+			for (int i = 0; i < lessons.size(); i++) {
+				String timeInfoString = "Day: " + lessons.get(i).getColumn("day") + ", Start: " + lessons.get(i).getColumn("startHour") + 
+						", End: " + lessons.get(i).getColumn("endHour") + ", Type: " + lessons.get(i).getColumn("type");
+				Venue venue = null;
+				try {
+					venue = lessons.get(i).getVenue();
+				}
+				catch (NoResultException nre) {
+					System.err.println(nre);
+					try {
+						Thread.sleep(3);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					continue;
+				}
+				catch (SQLException e) {
+					System.err.println(e);
+					try {
+						Thread.sleep(3);
+					} catch (InterruptedException ie) {
+						// TODO Auto-generated catch block
+						ie.printStackTrace();
+					}
+					return;
+				}
+				
+				timeInfoString += ", location: " + venue.getColumn("location");
+				System.out.println("**************************");
+				System.out.println(timeInfoString);
+			}
+		}else {
+			System.err.println((String) results.get("message"));
+		}
 	}
 	
 	public boolean assign(Lesson lesson) throws InsertFailedException {

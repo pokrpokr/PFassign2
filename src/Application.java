@@ -31,6 +31,7 @@ public class Application {
 			studentMenu(scanner, currentUser);
 			break;
 		case "Staff":
+			staffMenu(scanner, currentUser);
 			break;
 		case "Admin":
 			System.out.println("Menu :");
@@ -108,7 +109,6 @@ public class Application {
 			System.out.println("Please choose your account type : {student: 1, staff: 2}");
 			int type = scanner.nextInt();
 			scanner.nextLine();
-			System.out.println(type != 1);
 			while (!(type == 1 || type == 2)) {
 				System.err.println("Type must be 'student' or 'staff'!");
 				System.out.println("Please enter your account type :");
@@ -127,13 +127,34 @@ public class Application {
 					break;
 				case 2:
 					userType = "staff";
+					ArrayList<Staff> staffs = new ArrayList<>();
+					try {
+						staffs = Staff.staffs();
+					} catch (SQLException se) {
+						throw se;
+					}
+					if (staffs.size() == 0) {
+						throw new NoResultException("Please add staff first");
+					}
+					for (int i = 0; i < staffs.size(); i++) {
+						if (!signNum.equals(staffs.get(i).getColumn("eNo"))) throw new NoResultException("Staff does not exist"); 
+					}
+					break;
 				default:
 					throw new InsertFailedException("Wrong type!");
 				}
 				currentUser = signup(signNum, encodePassword, userType);
-			} catch (InsertFailedException ie) {
+			}
+			catch (NoResultException nre) {
+				System.err.println(nre);
+			}
+			catch (SQLException se) {
+				System.err.println("SQL wrong");
+			}
+			catch (InsertFailedException ie) {
 				System.out.println("Signup user failed");				
-			} catch (Exception e) {
+			} 
+			catch (Exception e) {
 				System.out.println(e);
 			}
 		}
@@ -839,7 +860,7 @@ public class Application {
 		int stIfcontinue = 0;
 		do {
 			System.out.println("Welcome " + student.getColumn("userNum"));
-			String[] operations = new String[] {"Enrol Course Offering", "Register Tutorial", "Logout"};
+			String[] operations = new String[] {"Enrol Course Offering", "Register Tutorial", "TimeTable", "Logout"};
 			for (int i = 0; i < operations.length; i++) {
 				System.out.println(operations[i] + ": " + (i+1));
 			}
@@ -1106,6 +1127,18 @@ public class Application {
 				stIfcontinue = 1;
 				break;
 			case 3:
+				student.getTimeTable();
+				try {
+					Thread.sleep(3);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Wanna go back?[Y:1, N:2]");
+				stIfcontinue =scanner.nextInt();
+				scanner.nextLine();
+				break;
+			case 4:
 				stIfcontinue = 2;
 				break;
 			default:
@@ -1113,5 +1146,35 @@ public class Application {
 				break;
 			}
 		} while (stIfcontinue == 1);
+	}
+
+	private static void staffMenu(Scanner scanner, Customers staff) {
+		System.out.println("Welcome " + staff.getColumn("userNum"));
+		System.out.println("List Time Table: 1 ");
+		System.out.println("Logout:          2 ");
+		int opNum = scanner.nextInt();
+		scanner.nextLine();
+		switch (opNum) {
+		case 1:
+			ArrayList<Staff> staffs = new ArrayList<>();
+			Staff stf = null;
+			try {
+				staffs = Staff.staffs();
+			} catch (Exception e) {
+				// Do nothing, if you can login as staff, staff must exist
+			}
+			for (int i = 0; i < staffs.size(); i++) {
+				if (staff.getColumn("userNum").equals(staffs.get(i).getColumn("eNo"))) {
+					stf = staffs.get(i);
+					break;
+				}
+			}
+			stf.getTimetable();
+			break;
+		case 2:
+			break;
+		default:
+			break;
+		}
 	}
 }

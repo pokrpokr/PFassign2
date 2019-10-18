@@ -1,10 +1,13 @@
 package app;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import cu_exceptions.InsertFailedException;
+import cu_exceptions.NoResultException;
 import db.DB;
 
 public class Lesson {
@@ -43,6 +46,21 @@ public class Lesson {
 	// TODO Refactor logic
 	protected boolean setStaff(Staff staff) throws InsertFailedException {
 		return this.setColumn("staffId", staff.getColumn("id"));
+	}
+	
+	public Venue getVenue() throws NoResultException, SQLException {
+		Venue venue = null;
+		DB db = new DB();
+		String sql = "select location from venues where id = " + this.getColumn("venueId") + " and deleted_at is null";
+		HashMap<String, Object> result = db.search(db.getConn(), "Venue", sql);
+		if ((boolean) result.get("status")) {
+			ArrayList<Object> data = (ArrayList<Object>) result.get("data");
+			if (data.size() == 0) throw new NoResultException("No venue");
+			venue = (Venue) data.get(0);
+			return venue;
+		} else {
+			throw new SQLException("SQL wrong(getVenue)");
+		}
 	}
 	
 	public Object getColumn(String columnName) {
