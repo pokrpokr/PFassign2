@@ -50,7 +50,7 @@ public class Enrolment {
 			return -1;
 		}
 		DB db = new DB();
-		String sql = "select id from enrolments where "+ cName + " = " + l.getColumn("id") + "and deleted_at is null";
+		String sql = "select id from enrolments where "+ cName + " = " + l.getColumn("id") + " and deleted_at is null";
 		HashMap<String, Object> result = db.search(db.getConn(), "Enrolment", sql);
 		if ((boolean) result.get("status")) {
 			return ((ArrayList<Object>) result.get("data")).size(); 

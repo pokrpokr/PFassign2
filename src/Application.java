@@ -1445,10 +1445,10 @@ public class Application {
 							break;
 						}
 					}
-					ArrayList<Tutorial> tus = new ArrayList<>();
+					ArrayList<Lesson> tus = new ArrayList<>();
 					for (int i = 0; i < lessons.size(); i++) {
 						if (lessons.get(i).getColumn("type").equals("Tutorial")) {
-								tus.add((Tutorial) lessons.get(i));
+								tus.add(lessons.get(i));
 							}
 						}
 					if (el == null || co == null || lessons.size() == 0 || tus.size() ==0) {
@@ -1586,7 +1586,7 @@ public class Application {
 		int opNum = -1;
 		do {
 			try {
-				opNum = scanner.nextInt() - 1;
+				opNum = scanner.nextInt();
 				scanner.nextLine();
 			} catch (InputMismatchException ime) {
 				System.err.println("Wrong input");

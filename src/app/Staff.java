@@ -64,7 +64,7 @@ public class Staff {
 	public void getTimetable() {
 		ArrayList<Lesson> lessons = new ArrayList<>();
 		DB db = new DB();
-		String sql = "select day, startHour, endHour, type from lessons where staffId = " + this.getColumn("id") + " and deleted_at is null";
+		String sql = "select venueId, day, startHour, endHour, type from lessons where staffId = " + this.getColumn("id") + " and deleted_at is null";
 		HashMap<String, Object> results = db.search(db.getConn(), "Lesson", sql);
 		if ((boolean) results.get("status")) {
 			ArrayList<Object> data = (ArrayList<Object>) results.get("data");
